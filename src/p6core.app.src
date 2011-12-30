@@ -1,0 +1,15 @@
+%% -*- Mode:erlang;tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% vim: ts=4:sts=4:sw=4:et:sta:
+{application, p6core,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  sasl,
+                  lager
+                 ]},
+  {mod, { p6core_app, []}}
+ ]}.

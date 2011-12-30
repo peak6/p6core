@@ -1,0 +1,5 @@
+%% -*- Mode:erlang;tab-width: 4;erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 ft=erlang et
+
+{include,"test2.txt"}.
+
