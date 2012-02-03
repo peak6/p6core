@@ -17,9 +17,21 @@
 -export([pathRead/2]).
 -export([pathFindType/3]).
 -export([readLink/1]).
-
+-export([fileType/1]).
+-export([resolveDots/1]).
+-export([absPath/1]).
 
 -include_lib("kernel/include/file.hrl").
+
+absPath(Path = [$/|_Ignore]) -> resolveDots(Path);
+absPath(Path) -> resolveDots(p6str:mkstr("~s/~s",[okget:ok(file:get_cwd()),Path])).
+
+resolveDots(Path) -> resolveDots(filename:split(Path),[]).
+
+resolveDots([],N) -> filename:join(lists:reverse(N));
+resolveDots(["."|ORest],N) -> resolveDots(ORest,N);
+resolveDots([".."|ORest],[_Remove|NRest]) -> resolveDots(ORest,NRest);
+resolveDots([O|ORest],N) -> resolveDots(ORest,[O|N]).
 
 readLink(File) ->
     case file:read_link(File) of
