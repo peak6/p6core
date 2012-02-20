@@ -32,19 +32,32 @@ procEnv(Env=#env{env=E},Envs,Items) ->
 procAdd(Env,App,Items) ->
     tryLoad(Env,App),
     lists:foreach(fun({K,V}) when is_list(V) ->
+						  DCVals = [ getDCKey(Elem) || Elem <- V ],
                           case application:get_env(App,K) of
-                              undefined -> setEnv(Env,App,K,V);
-                              {ok,L} when is_list(L) -> setEnv(Env,App,K,L++V);
-                              {ok,T} -> setEnv(Env,App,K,[T,V])
+                              undefined -> setEnv(Env,App,K,DCVals);
+                              {ok,L} when is_list(L) -> setEnv(Env,App,K,L++DCVals);
+                              {ok,T} -> setEnv(Env,App,K,[T,DCVals])
                           end
                   end,Items),
     Env#env{app=App}.
 
 procSet(Env,App,Items) -> 
     tryLoad(Env,App),
-    lists:foreach(fun({K,V}) -> setEnv(Env,App,K,V) end, Items),
+    lists:foreach(fun({K,V}) -> setEnv(Env,App,K,getDCKey(V)) end, Items),
     Env#env{app=App}.
 
+getDCKey(V) when is_list(V) ->
+	case proplists:get_value(getDatacenter(), V) of
+		undefined -> V;
+		Else -> Else
+	end;
+getDCKey(V) -> V.
+
+getDatacenter() -> {ok, Host} = inet:gethostname(), getDatacenter(Host).
+getDatacenter(Host) when is_list(Host) -> getDatacenter(list_to_binary(Host));
+getDatacenter(<<"pslchi6", _Rest/binary>>) -> stargate;
+getDatacenter(<<"pslchi5", _Rest/binary>>) -> savvis;
+getDatacenter(_Other) -> stargate.
 
 doApply(Env,M,F,A) ->
     ?ldebug(Env,"Applying: ~p:~p(~p)",[M,F,A]), 
