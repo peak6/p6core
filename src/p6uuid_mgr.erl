@@ -94,7 +94,7 @@ genIds(Count) ->
     case p6exec:exec(Cmd) of
         {0,Bin} -> convert(Bin,Count,[]);
         {Err,Bin} -> ?lwarn("Failed command: ~p~n  Error: ~p, Msg: ~s",[Cmd,Err,Bin]),
-                     lists:map(fun(_) -> uuid:random() end,lists:seq(1,Count))
+                     lists:map(fun(_) -> uuid:srandom() end,lists:seq(1,Count))
     end.
 
 convert(<<>>,0,Acc) -> Acc;
