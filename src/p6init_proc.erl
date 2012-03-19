@@ -55,9 +55,9 @@ getDCKey(V) -> V.
 
 getDatacenter() -> {ok, Host} = inet:gethostname(), getDatacenter(Host).
 getDatacenter(Host) when is_list(Host) -> getDatacenter(list_to_binary(Host));
-getDatacenter(<<"pslchi6", _Rest/binary>>) -> stargate;
-getDatacenter(<<"pslchi5", _Rest/binary>>) -> savvis;
-getDatacenter(_Other) -> stargate.
+getDatacenter(<<_BizChar:1/binary, "slchi6", _Rest/binary>>) -> chi6;
+getDatacenter(<<_BizChar:1/binary, "slchi5", _Rest/binary>>) -> chi5;
+getDatacenter(_Other) -> chi6.
 
 doApply(Env,M,F,A) ->
     ?ldebug(Env,"Applying: ~p:~p(~p)",[M,F,A]), 
