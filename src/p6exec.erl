@@ -19,7 +19,8 @@
 
 exec(Cmd) -> exec(1000,Cmd).
 exec(Timeout, Cmd) when is_integer(Timeout) ->
-    getResponse(Timeout,
+    catch
+        getResponse(Timeout,
                 erlang:open_port(
                   {spawn,Cmd},
                   [in,
