@@ -20,17 +20,39 @@
 -export([fileType/1]).
 -export([resolveDots/1]).
 -export([absPath/1]).
+-export([real_path/1,real_path/2]).
 
 -include_lib("kernel/include/file.hrl").
 
 absPath(Path = [$/|_Ignore]) -> resolveDots(Path);
 absPath(Path) -> resolveDots(p6str:mkstr("~s/~s",[okget:ok(file:get_cwd()),Path])).
 
+%% Returns Path with all links resolved
+real_path(Path) ->
+    [Root|Rest] = filename:split(filename:absname(Path)),
+    real_path(Root,Rest).
+
+%% Returns Base + Resolved path elements
+real_path(Path,[]) -> {ok,resolveDots(Path)};
+real_path(Base,[P|Ath]) ->
+    FP = filename:join(Base,P),
+    case file:read_link(FP) of
+	{error,einval} ->
+	    real_path(FP,Ath);
+	{ok,RP=[$/|_]} -> real_path(RP,Ath);
+	{ok,P} -> {error,eloop};
+	{ok,L} ->
+	    real_path(Base,filename:split(L)++Ath);
+	Other -> Other
+    end.
+
 resolveDots(Path) -> resolveDots(filename:split(Path),[]).
 
 resolveDots([],N) -> filename:join(lists:reverse(N));
 resolveDots(["."|ORest],N) -> resolveDots(ORest,N);
 resolveDots([".."|ORest],[_Remove|NRest]) -> resolveDots(ORest,NRest);
+resolveDots([<<".">>|ORest],N) -> resolveDots(ORest,N);
+resolveDots([<<"..">>|ORest],[_Remove|NRest]) -> resolveDots(ORest,NRest);
 resolveDots([O|ORest],N) -> resolveDots(ORest,[O|N]).
 
 readLink(File) ->

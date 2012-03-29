@@ -13,6 +13,7 @@
 %% limitations under the License.
 -module(p6str).
 
+-export([mkio/1,mkio/2]).
 -export([mkbin/1,mkbin/2]).
 -export([mkstr/1,mkstr/2]).
 -export([mkatom/1,mkatom/2,mkexatom/2]).
@@ -73,6 +74,15 @@ sock_to_ipstr(Sock) ->
 sock_to_str(Sock) ->
     {ok,{H,P}} = inet:peername(Sock),
     ip_port_to_str(H,P).
+
+mkio(Bin) when is_binary(Bin) -> [Bin];
+mkio(Atom) when is_atom(Atom) -> atom_to_list(Atom);
+mkio(Int) when is_integer(Int) -> integer_to_list(Int);
+mkio(Float) when is_float(Float) -> float_to_list(Float);
+mkio(Str=[I|_]) when is_integer(I) -> Str;
+mkio(Other) -> io_lib:format("~p",[Other]).
+
+mkio(Fmt,Args) -> io_lib:format(Fmt,Args).
 
 mkbin(Bin) when is_binary(Bin) -> Bin;
 mkbin(Atom) when is_atom(Atom) -> atom_to_binary(Atom,utf8);
