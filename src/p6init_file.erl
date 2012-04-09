@@ -4,12 +4,12 @@
 
 -include("p6init.hrl").
 
-loadFile(Env=#env{file=OFile},File) -> 
+loadFile(Env=#env{file=OFile},File) ->
     (loadFile(Env#env{file=File}))#env{file=OFile}.
 
 loadFile(Env=#env{file=File}) ->
     case file:path_consult(Env#env.paths,File) of
-        {ok,Items,LoadedFile} -> 
+        {ok,Items,LoadedFile} ->
             ?ldebug(Env,"Loaded: ~p from: ~p",[LoadedFile,Env#env.paths]),
             NewEnv = Env#env{paths=[filename:dirname(File)|Env#env.paths]},
             lists:foldl(
@@ -36,4 +36,4 @@ addLoaded(File,Env=#env{paths=Paths,loaded=Loaded}) ->
         true -> Env#env{loaded=[AbsFile|Loaded]};
         false -> Env#env{paths=Paths++[Abs],loaded=[AbsFile|Loaded]}
     end.
-    
+

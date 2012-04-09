@@ -46,7 +46,7 @@ get(Key,PList) ->
     get(Key,PList,undefined).
 
 first([],_,Default) -> Default;
-first([P|Rest],PList,Default) -> 
+first([P|Rest],PList,Default) ->
     case proplists:lookup(P,PList) of
         none -> first(Rest,PList,Default);
         Other -> Other
@@ -56,7 +56,7 @@ first(Keys,PList) ->
     first(Keys,PList,undefined).
 
 anyAndMap(KeyMap,PList) -> anyAndMap(KeyMap,PList,undefined).
-anyAndMap(KeyMap,PList,Default) -> 
+anyAndMap(KeyMap,PList,Default) ->
     {Keys,Maps} = lists:unzip(KeyMap),
     First = any(Keys,PList,'$kmdefault'),
     lists:map(fun({'$kmdefault',{_,Val}}) -> Val;
@@ -75,10 +75,10 @@ any([Key|Rest],PList,Default,Acc) -> any(Rest,PList,Default,[get(Key,PList,Defau
 all(Keys,PList) -> all(Keys,PList,[]).
 
 all([],_PList,Result) -> {ok,lists:reverse(Result)};
-all([Key|Keys],PList,Result) -> 
+all([Key|Keys],PList,Result) ->
     case lists:keyfind(Key,1,PList) of
         false -> {error,{missing,Key}};
         {Key,Val} -> all(Keys,PList,[Val|Result])
     end.
 
-    
+

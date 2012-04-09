@@ -49,7 +49,7 @@ count(Name,Owner,Key) ->
     ets:select_count(Name,[{#dm{key=Key,owner=Owner},[],[true]}]).
 
 keyToNodes(Name) -> ets:match(Name,#dm{node='$2',key='$1'}).
-                          
+
 getOwnerEntries(Name,Owner) -> getOwnerEntries(Name,Owner,'_').
 getOwnerEntries(Name,Owner,Type) -> ets:match(Name,#dm{owner=Owner,key='$1',val='$2',type=Type}).
 getNodeEntries(Name,Type,Node) -> ets:match(Name,#dm{owner='$1',key='$2',val='$3',type=Type,node=Node}).

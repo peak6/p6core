@@ -36,7 +36,7 @@ nowAs(Type) -> convert(os:timestamp(),msu,Type).
 %% @doc Computes N timeType() units from now.
 %%
 -spec(fromNow(Type::timeType(),N::integer()) -> integer()).
-fromNow(msu,{M,S,U}) -> 
+fromNow(msu,{M,S,U}) ->
 	{NM,NS,NU} = nowAs(msu),
 	normalize(M+NM, S+NS, U+NU);
 
@@ -90,7 +90,7 @@ convert(      N, From,  sec) -> convert(N,From,s).
 
 normalize({M,S,U}) -> normalize(M,S,U).
 
-normalize(M,S,U) -> 
+normalize(M,S,U) ->
     US = M * ?MEGA_US + S * ?SEC_US + U,
     Mega = US div ?MEGA_US,
     Sec = US rem ?MEGA_US div ?SEC_US,

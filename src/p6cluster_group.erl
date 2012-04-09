@@ -31,7 +31,7 @@
 
 start_link(Name,Owner) when is_pid(Owner) ->
     gen_server:start_link({local,Name}, ?MODULE, [Name,Owner], []).
-    
+
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
 %% ------------------------------------------------------------------
@@ -48,24 +48,24 @@ handle_cast({ping,RemoteCluster,RemoteOwner}, State=#state{owner=Owner}) ->
     case docall(Owner,{clusterAdd,RemoteOwner}) of
         new -> docast(RemoteCluster,{ping,self(),Owner});
         {exists,_} -> ok;
-        Other -> 
+        Other ->
             ?linfo("Unexpected response to clusterAdd, owner: ~p, remote: ~p, result: ~p",
                    [Owner,RemoteOwner,Other ])
     end,
     {noreply,State};
-                  
+
 handle_cast(Msg, State) ->
     ?linfo("Unexpected cast: ~p, with state: ~p",[Msg,State]),
     {noreply, State}.
 
-handle_info({nodedown,_Node},State) -> 
-    {noreply,State}; 
+handle_info({nodedown,_Node},State) ->
+    {noreply,State};
 
 handle_info({nodeup,Node},State=#state{name=Name,owner=O}) ->
     castNode(Node,Name,{ping,self(),O}),
     {noreply,State};
 
-handle_info(Info, State) -> 
+handle_info(Info, State) ->
     ?linfo("Unexpected info: ~p, with state: ~p",[Info,State]),
     {noreply, State}.
 

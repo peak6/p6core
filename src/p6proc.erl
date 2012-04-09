@@ -6,7 +6,7 @@
 info(Procs,Stat) when is_list(Procs) ->
     [{P,info(P,Stat)} || P <- Procs];
 
-info(Name,Stat) when is_atom(Name) -> 
+info(Name,Stat) when is_atom(Name) ->
     case whereis(Name) of
         Pid when is_pid(Pid) -> info(Pid,Stat);
         _Other -> undefined
@@ -21,7 +21,7 @@ info(Pid,{Stat,FromUnit,ToUnit}) ->
         {_,undefined} -> undefined;
         {_,N} -> {Stat,p6mem:convert(N,FromUnit,ToUnit)}
     end;
-        
+
 info(Pid,Stat) when is_pid(Pid) andalso is_atom(Stat) ->
     process_info(Pid,Stat).
 

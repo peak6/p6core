@@ -3,7 +3,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -include("time.hrl").
 
-nop_test_() -> 
+nop_test_() ->
 	[ ?_assertEqual(2,p6time:convert(2,Type,Type)) || Type <- [mega,s,ms,us] ].
 
 sec_msu_test() ->

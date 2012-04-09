@@ -36,5 +36,5 @@ as_byte_strings([N1,N2|Rest],Acc) ->
     as_byte_strings(Rest,[[N1,N2]|Acc]).
 
 
-    
+
 

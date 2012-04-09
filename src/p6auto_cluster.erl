@@ -33,7 +33,7 @@ start_link() ->
         _ -> start_link([])
     end.
 
-start_link(Nodes) -> 
+start_link(Nodes) ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, Nodes, []).
 
 
@@ -62,25 +62,25 @@ handle_cast(Msg, State) ->
 
 handle_info({nodeup,Node},State) ->
     {Rep,NS} = addN(Node,State),
-    case Rep of 
+    case Rep of
         ok -> ok;
         Rep -> ?lwarn("Unexpected result of {nodeAdded,~p} : ~p",[Node,Rep])
     end,
     {noreply,NS};
 handle_info({nodedown,Node},State) ->
     {Rep,NS} = delN(Node,State),
-    case Rep of 
+    case Rep of
         ok -> ok;
         Rep -> ?lwarn("Unexpected result of {nodeRemoved,~p} : ~p",[Node,Rep])
     end,
     {noreply,checkAndConnect(NS)};
-                
+
 handle_info(check,State) ->
     {noreply,checkAndConnect(State)};
 
 handle_info(timeout,State=#state{tref=undefined}) ->  % initial check
     {noreply,checkAndConnect(State)};
-    
+
 handle_info(Info, State) ->
     ?linfo("Unexpected info: ~p, with state: ~p",[Info,State]),
     {noreply, State}.
@@ -94,12 +94,12 @@ code_change(_OldVsn, State, _Extra) ->
 call(Term) -> gen_server:call(?SERVER,Term).
 
 checkAndConnect(State=#state{tref=undefined,acNodes=[]}) -> State;
-checkAndConnect(State=#state{tref=TRef,acNodes=[]}) -> 
+checkAndConnect(State=#state{tref=TRef,acNodes=[]}) ->
     {ok,cancel} = timer:cancel(TRef),
     State;
 checkAndConnect(State=#state{tref=TRef,acNodes=ACNodes,nodes=Nodes}) ->
-    Attempted = 
-        lists:foldl(fun(N,CNodes)-> 
+    Attempted =
+        lists:foldl(fun(N,CNodes)->
                             case lists:member(N,Nodes) of
                                 false -> connect(N),[N|CNodes];
                                 true -> CNodes
@@ -107,18 +107,18 @@ checkAndConnect(State=#state{tref=TRef,acNodes=ACNodes,nodes=Nodes}) ->
                     end, [], ACNodes),
     case {TRef,Attempted} of
         {undefined,[]} -> ?linfo("No timer, and nothing to do"), State;
-        {undefined,N} -> {ok,Ref} = timer:send_interval(1000,check), 
+        {undefined,N} -> {ok,Ref} = timer:send_interval(1000,check),
                          ?linfo("Auto-connect nodes ~p are down, starting reconnect timer",[N]),
                          State#state{tref=Ref};
-        {Ref,[]} -> {ok,cancel} = timer:cancel(Ref), 
+        {Ref,[]} -> {ok,cancel} = timer:cancel(Ref),
                    ?linfo("All nodes connected, canceled check timer"),
                    State#state{tref=undefined};
         {_Ref,N} -> ?linfo("connect attempts made to: ~p",[N]), State
     end.
-    
+
 connect(Node) ->
     case net_kernel:connect(Node) of
-        true -> ?linfo("Connected to: ~p",[Node]), 
+        true -> ?linfo("Connected to: ~p",[Node]),
                 ok;
         _ -> ?linfo("Failed to connect to: ~p",[Node]),
              error
@@ -145,7 +145,7 @@ del(Elem,Node,State) ->
 
 fixName(Name) when is_atom(Name) -> fixName(atom_to_list(Name));
 fixName(Name) when is_list(Name) ->
-    case lists:member($@,Name) of 
+    case lists:member($@,Name) of
         true -> list_to_atom(Name);
         false -> list_to_atom(re:replace(
                                 atom_to_list(node()),

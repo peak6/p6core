@@ -27,7 +27,7 @@
 
 
 to_float(Bin) when is_binary(Bin) -> to_float(binary_to_list(Bin));
-to_float(List) when is_list(List) -> 
+to_float(List) when is_list(List) ->
     case catch list_to_float(List) of
         {'EXIT',{badarg,_}} ->
             float(list_to_integer(List));
@@ -52,13 +52,13 @@ to_upper(L) when is_list(L) -> [ to_upper(C) || C <- L ];
 to_upper(Bin) when is_binary(Bin) -> << <<(to_upper(B))>> || <<B:8>> <= Bin >>;
 to_upper(Other) -> Other.
 
-    
+
 ip_to_str({A,B,C,D}) ->
     mkstr("~p.~p.~p.~p",[A,B,C,D]).
 
-ip_port_to_str({A,B,C,D},Port) -> 
+ip_port_to_str({A,B,C,D},Port) ->
     mkstr("~p.~p.~p.~p:~p",[A,B,C,D,Port]).
-    
+
 local_sock_to_str(Sock) ->
     {ok,{H,P}} = inet:sockname(Sock),
     ip_port_to_str(H,P).

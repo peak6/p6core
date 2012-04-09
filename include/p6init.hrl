@@ -9,9 +9,9 @@
              entries=[],
              loaded=[],
              noexit=false,
-             paths=[filename:absname(F) 
-                    || F <- [okget:ok(file:get_cwd()),"priv"] 
-                           ++ [re:replace(P,"/ebin$","/priv",[{return,list}]) 
+             paths=[filename:absname(F)
+                    || F <- [okget:ok(file:get_cwd()),"priv"]
+                           ++ [re:replace(P,"/ebin$","/priv",[{return,list}])
                                || P <- code:get_path()] ]}).
 
 -define(log(Env,Level,Msg,Args), p6init_log:log(Env,Level,Msg,Args)).

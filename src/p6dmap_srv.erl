@@ -51,7 +51,7 @@ handle_call(getState,_From,State) -> {reply,?DUMP_REC(state,State),State};
 handle_call({add,Type,Key,Val,Owner},_From,State=#state{name=Name,clientGroup=CG}) ->
     Entry = xformAdd(?ENTRY(Type,Key,Val,Owner),State),
     case ets:insert_new(Name,Entry) of
-        true -> 
+        true ->
 			case Type of
 				g -> castPeers(Name,#dmAdd{owner=Owner,key=Key,val=Val});
 				_ -> ok
@@ -99,7 +99,7 @@ handle_cast({Node,gimme},State=#state{name=Name}) ->
 handle_cast({D,#dmSet{owner=O,key=K,val=V}},State=#state{name=Name}) ->
     ets:insert(Name,?REMOTE(D,K,V,O)),
     {noreply,State};
-    
+
 handle_cast({D,#dmAdd{owner=O,key=K,val=V}},State=#state{name=Name}) ->
     ets:insert(Name,xformAdd(?REMOTE(D,K,V,O),State)),
     {noreply,State};
@@ -114,7 +114,7 @@ handle_cast({_Node,#dmDel{key=K,owner=O}},State=#state{name=Name}) ->
 handle_cast({Node,#dmDelOwner{owner=Who}},State=#state{name=Name}) ->
     case ets:match(Name,#dm{owner=Who,key='$2'}) of
         [] -> ?linfo("Nothing to delete for ~p",[Who]);
-        Entries -> 
+        Entries ->
             N = ?DELETE(Name,#dm{owner=Who}),
             ?linfo("Deleted ~p entries: ~p for ~p / ~p",[N,lists:flatten(Entries),Who,Node])
     end,
@@ -145,7 +145,7 @@ handle_cast(Msg, State) ->
     ?linfo("Unexpected cast: ~p, with state: ~p",[Msg,State]),
     {noreply, State}.
 
-    
+
 handle_info({nodeup,Node},State=#state{name=Name}) ->
     castPeer(Node,Name,gimme),
     {noreply,State};
@@ -153,12 +153,12 @@ handle_info({nodeup,Node},State=#state{name=Name}) ->
 handle_info({nodedown,Node},State=#state{name=Name}) ->
     case ets:match(Name,#dm{node=Node,key='$2'}) of
         [] -> ?linfo("Nothing to delete for dead node ~p",[Node]);
-        Entries -> 
+        Entries ->
             N = ?DELETE(Name,#dm{node=Node}),
             ?linfo("Deleted ~p entries: ~p for dead node ~p",[N,lists:flatten(Entries),Node])
     end,
     {noreply,State};
-            
+
 handle_info({groupMemberUp,_,_}, State) ->
     {noreply,State};
 
@@ -169,8 +169,8 @@ handle_info({groupMemberDown,CG,Pid}, State=#state{clientGroup=CG,name=Name}) ->
              castPeers(Name,#dmDelOwner{owner=Pid})
     end,
     {noreply,State};
-    
-handle_info(Info, State) -> 
+
+handle_info(Info, State) ->
     ?linfo("Unexpected info: ~p, with state: ~p",[Info,State]),
     {noreply, State}.
 
@@ -186,7 +186,7 @@ code_change(_OldVsn, State, _Extra) ->
 castPeers(Name,Term) -> gen_server:abcast(nodes(),Name,{node(),Term}).
 castPeer(Node,Name,Term) -> gen_server:cast({Name,Node},{node(),Term}).
 
-getType(Name,Key,Owner) -> 
+getType(Name,Key,Owner) ->
     case ets:match(Name,#dm{pk={Key,Owner},type='$1'}) of
         [[T]] -> T;
         [] -> not_found
@@ -201,7 +201,7 @@ doXForm(Name,Fun,Data) -> doXForm(Name,Fun,{0,0},Data).
 doXForm(_Name,_Fun,Status,'$end_of_table') -> Status;
 
 doXForm(Name,MFA={M,F,A},Stats,{Match,Cont}) ->
-    NewStats = 
+    NewStats =
     lists:foldl(fun(Data=[O,K,_],{Recs,Changed}) ->
                         case apply(M,F,[Data|A]) of
                             '$ignore' ->

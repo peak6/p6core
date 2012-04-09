@@ -2,7 +2,7 @@
 -include("p6init.hrl").
 -compile([export_all]).
 
-proc(Env) -> 
+proc(Env) ->
     proc(Env,Env#env.entries).
 
 proc(Env=#env{curItem=Cur},Item) when Cur /= Item -> proc(Env#env{curItem=Item},Item);
@@ -24,7 +24,7 @@ proc(Env,Ignored) -> ?die(Env,"Don't know what to do with: ~p",[Ignored]).
 
 procEnv(Env,E,Items) when is_atom(E) -> procEnv(Env,[E],Items);
 procEnv(Env=#env{env=E},Envs,Items) ->
-    case lists:member(E,Envs) of 
+    case lists:member(E,Envs) of
         true -> proc(Env,Items);
         false -> Env
     end.
@@ -41,7 +41,7 @@ procAdd(Env,App,Items) ->
                   end,Items),
     Env#env{app=App}.
 
-procSet(Env,App,Items) -> 
+procSet(Env,App,Items) ->
     tryLoad(Env,App),
     lists:foreach(fun({K,V}) -> setEnv(Env,App,K,getDCKey(V)) end, Items),
     Env#env{app=App}.
@@ -60,19 +60,19 @@ getDatacenter(<<_BizChar:1/binary, "slchi5", _Rest/binary>>) -> chi5;
 getDatacenter(_Other) -> chi6.
 
 doApply(Env,M,F,A) ->
-    ?ldebug(Env,"Applying: ~p:~p(~p)",[M,F,A]), 
-    erlang:apply(M,F,A), 
+    ?ldebug(Env,"Applying: ~p:~p(~p)",[M,F,A]),
+    erlang:apply(M,F,A),
     Env.
 
 
-setCookie(Env=#env{env=E},{Node,'$env'}) -> 
+setCookie(Env=#env{env=E},{Node,'$env'}) ->
     setCookie(Env,{Node,p6str:mkatom("mmd_~s",[E])});
-setCookie(Env,{Node,Cookie}) -> 
+setCookie(Env,{Node,Cookie}) ->
     ?ldebug("Setting cookie: ~p / ~p",[Node,Cookie]),
     true = erlang:set_cookie(Node,Cookie),
     Env;
 setCookie(Env,Cookie) -> setCookie(Env,{node(),Cookie}).
-                      
+
 setEnv(E,A,K,V) ->
     ?ldebug(E,"Setting: ~p/~p = ~p",[A,K,V]),
     application:set_env(A,K,V),
@@ -82,7 +82,7 @@ tryLoad(Env,App) ->
     case appStatus(Env,App) of
         undefined ->
             case application:load(App) of
-                ok -> 
+                ok ->
                     case application:get_key(App,applications) of
                         {ok,List} -> lists:foreach(fun(A)->tryLoad(Env,A) end, List);
                         undefined -> ?die(Env,"Dont think ok is ok here"),ok
@@ -110,16 +110,16 @@ doStart(Env,App) ->
         _ -> ok
     end,
     case application:get_key(App,applications) of
-        {ok,List} -> 
+        {ok,List} ->
             ?linfo(Env,"Starting application '~p', depends on: ~p",[App,List]),
             lists:foreach(fun(A)->startApp(Env,A) end, List);
-        undefined -> 
+        undefined ->
             ?linfo(Env,"Starting application '~p'",[App]),
             ok
     end,
     ?ldebug(Env,"~p vars before starting: ~p",[App,application:get_all_env(App)]),
     case application:start(App) of
-        ok -> 
+        ok ->
             ?ldebug(Env,"~p vars after starting: ~p",[App,application:get_all_env(App)]),
             Env;
         {error,{already_started,App}} -> ?ldebug(Env,"Already started '~p'",[App]);
@@ -129,7 +129,7 @@ doStart(Env,App) ->
 appStatus(_Env,App) ->
     Info = application:info(),
     States = [State || {State,_} <- lists:filter(fun({_,Items}) -> lists:keymember(App,1,Items)  end, Info)],
-    
+
     case lists:reverse(States) of
         [] -> undefined;
         [loading|_] -> loaded;

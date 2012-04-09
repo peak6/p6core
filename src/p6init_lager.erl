@@ -25,7 +25,7 @@ initLager(Env,_Props) ->
         {ok,true} -> Console = [{lager_console_backend,[debug,true]}];
         _ -> Console = []
     end,
-    
+
     ?lset(handlers,
           Console ++ [
                       {lager_file_backend,[{p6str:mkstr("~s/server.log",[LogDir]),debug,10485760,"$D0",5}]}

@@ -87,7 +87,7 @@ init([Name,Option]) -> init([Name,[Option]]).
 
 handle_call(refs,_From,State=#state{members=M}) -> {reply,M,State};
 handle_call(members,_From,State) -> {reply,memberList(State),State};
-handle_call(watchers,_From,State=#state{watchers=undefined,name=N}) -> 
+handle_call(watchers,_From,State=#state{watchers=undefined,name=N}) ->
     W = p6str:mkatom("~p_watchers",[N]),
     {ok,_} = p6pg:start_link(W),
     {reply,W,State#state{watchers=W}};
@@ -152,14 +152,14 @@ handle_cast(Msg, State) ->
 
 handle_info({'DOWN',_Ref,process,Pid,Reason},State=#state{members=Members,name=Name,watchers=W}) ->
     case ?takePid(Pid,Members) of
-        {value,R,NewMem} -> 
+        {value,R,NewMem} ->
             sendWatchers(W,{groupMemberDown,Name,R#ref.pid}),
             {noreply,State#state{members=NewMem}};
         false -> ?lwarn("Unknown process: ~p died: ~p",[Pid,Reason]),
                  {noreply,State}
     end;
-        
-handle_info(Info, State) -> 
+
+handle_info(Info, State) ->
     ?linfo("Unexpected info: ~p, with state: ~p",[Info,State]),
     {noreply, State}.
 
@@ -175,7 +175,7 @@ code_change(_OldVsn, State, _Extra) ->
 sendWatchers(undefined,_Term) -> ok;
 sendWatchers(W,Term) -> p6pg:send(W,Term).
 sendWatchers(#state{watchers=undefined},_,_) -> ok;
-sendWatchers(#state{watchers=W,name=N},Atom,Pid) -> 
+sendWatchers(#state{watchers=W,name=N},Atom,Pid) ->
     sendWatchers(W,{Atom,N,Pid}).
 
 docast(Pid, Term) -> gen_server:cast(Pid, Term).

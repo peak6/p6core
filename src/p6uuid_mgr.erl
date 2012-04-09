@@ -27,7 +27,7 @@
 
 -include("logger.hrl").
 
--define(SERVER, ?MODULE). 
+-define(SERVER, ?MODULE).
 
 -define(POOL_SZ,100).
 
@@ -55,7 +55,7 @@ init([]) ->
 handle_call(verify,_From,State=#state{size=Sz,ids=Ids}) ->
     {reply,Sz == length(Ids),State};
 
-handle_call(size,_From,State=#state{size=Sz}) -> 
+handle_call(size,_From,State=#state{size=Sz}) ->
     {reply,Sz,State};
 
 handle_call({next,N},_From,State=#state{size=Sz}) when Sz < N ->

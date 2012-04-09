@@ -69,7 +69,7 @@ fileType(File) ->
         {ok,#file_info{type=regular}} -> file;
         {ok,#file_info{type=directory}} -> dir
     end.
-    
+
 pathFindType([],_Name,_Type) -> {error,enoent};
 pathFindType([Dir|Rest],Name,Type) ->
     Check = Dir ++ "/" ++ Name,
@@ -83,7 +83,7 @@ pathRead(Path,File) ->
         {file,F} -> file:read_file(F);
         Other -> Other
     end.
-   
+
 read_lines(File,N) ->
     case file:open(File,[read]) of
         {ok,IO} ->
@@ -102,6 +102,6 @@ readAndClose(IODev,N,Acc) ->
         eof -> finish(IODev,Acc);
         Other -> Other
     end.
-                                   
 
-            
+
+

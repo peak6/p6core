@@ -25,7 +25,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--define(SERVER, ?MODULE). 
+-define(SERVER, ?MODULE).
 -include("logger.hrl").
 -include_lib("kernel/include/file.hrl").
 -record(state, {lastTime=stamp(1),interval,tracked=[],enabled=false}).
@@ -89,7 +89,7 @@ handle_cast(Msg, State) ->
 handle_info(timeout,State=#state{tracked=Tracked}) ->
     case doReload(State) of
 	{NewTs,[]} -> mkNoReply(State#state{lastTime=NewTs});
-	{NewTs,Results} -> 
+	{NewTs,Results} ->
             NewTracked = lists:foldl(fun({N,S},NT) -> stateChanged(N,S,NT) end, Tracked, Results),
             mkNoReply(State#state{lastTime=NewTs,tracked=NewTracked})
 %%            ?linfo("Reload Results for ~p -> ~p: ~p",[dateStr(LT),dateStr(NewTs),Results])
@@ -114,7 +114,7 @@ stateChanged(Name,missing,Tracked) ->
             ?lwarn("Missing module: ~p",[Name]),
             [Name|Tracked]
     end;
-stateChanged(Name,reloaded,Tracked) -> 
+stateChanged(Name,reloaded,Tracked) ->
     ?linfo("Reloaded: ~p",[Name]),
     lists:delete(Name,Tracked);
 stateChanged(Name,State,Tracked) ->
@@ -140,7 +140,7 @@ doReload(#state{lastTime=When}) ->
 doReload(From,To) ->
     {To,lists:foldl(
 	  fun({Module,File},Acc) when is_list(File) ->
-		  case check(From,To,Module,File) of 
+		  case check(From,To,Module,File) of
 		      unmodified -> Acc;
 		      Other -> [{Module,Other}|Acc]
 		  end;
@@ -154,7 +154,7 @@ doReload(From,To) ->
 check(From,To,Module,File) ->
     case file:read_file_info(File) of
 	{ok,#file_info{mtime=MTime}} when MTime >= From, MTime < To ->
-	    case reload(Module) of 
+	    case reload(Module) of
 		{module,Module} -> reloaded;
 		Other -> Other
 	    end;
@@ -163,7 +163,7 @@ check(From,To,Module,File) ->
 	    missing;
 	Other -> Other
     end.
-    
+
 reload(Module) ->
     case code:purge(Module) of
 	true -> ?lwarn("Process killed as result of reloading: ~p",[Module]);

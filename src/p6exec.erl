@@ -18,8 +18,8 @@
 
 
 exec(Cmd) -> exec(1000,Cmd).
-exec(Timeout, Cmd) when is_integer(Timeout) -> 
-    getResponse(Timeout, 
+exec(Timeout, Cmd) when is_integer(Timeout) ->
+    getResponse(Timeout,
                 erlang:open_port(
                   {spawn,Cmd},
                   [in,
@@ -51,4 +51,4 @@ getResponse(Timeout,Port,Acc) ->
             erlang:port_close(Port),
             {timeout,Acc}
     end.
-                                
+
