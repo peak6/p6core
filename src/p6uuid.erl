@@ -14,10 +14,13 @@
 -module(p6uuid).
 
 -export([parse/1,safeparse/1]).
--export([next/0,next/1]).
+-export([next/0,next/1,nextAsString/0]).
 
 next() -> p6uuid_mgr:next().
 next(N) -> p6uuid_mgr:next(N).
+
+nextAsString()->
+    uuid:to_string(p6uuid:next()).
 
 safeparse(Token) ->
     try parse(Token)
