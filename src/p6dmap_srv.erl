@@ -165,8 +165,7 @@ handle_info({groupMemberUp,_,_}, State) ->
 handle_info({groupMemberDown,CG,Pid}, State=#state{clientGroup=CG,name=Name}) ->
     case ?DELETE(Name,#dm{owner=Pid}) of
         0 -> ?lerr("Received group down message but I have no entries for: ~p",[Pid]);
-        N -> ?linfo("Deleted ~p entries due death of ~p",[N,Pid]),
-             castPeers(Name,#dmDelOwner{owner=Pid})
+        _N -> castPeers(Name,#dmDelOwner{owner=Pid})
     end,
     {noreply,State};
 
