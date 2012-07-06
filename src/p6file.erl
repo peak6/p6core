@@ -18,11 +18,13 @@
 -export([pathFindType/3]).
 -export([readLink/1]).
 -export([fileType/1]).
+-export([lastMod/1]).
 -export([resolveDots/1]).
 -export([absPath/1]).
 -export([real_path/1,real_path/2]).
 
 -include_lib("kernel/include/file.hrl").
+-include("p6core.hrl").
 
 absPath(Path = [$/|_Ignore]) -> resolveDots(Path);
 absPath(Path) -> resolveDots(p6str:mkstr("~s/~s",[okget:ok(file:get_cwd()),Path])).
@@ -61,6 +63,12 @@ readLink(File) ->
         %% so just return the original path
         {error,einval} -> {ok,File};
         Other -> Other
+    end.
+
+lastMod(File) ->
+    case file:read_file_info(File) of
+	{ok,#file_info{mtime=M}} -> {ok,M};
+	Other -> Other
     end.
 
 fileType(File) ->

@@ -33,7 +33,7 @@ execArgs(Cmd,Args) -> execArgs(1000,Cmd,Args).
 execArgs(Timeout,Cmd,Args) when is_integer(Timeout) ->
     getResponse(Timeout,
                 erlang:open_port(
-                  {spawn,Cmd},
+                  {spawn_executable,os:find_executable(Cmd)},
                   [in,
                    binary,
                    exit_status,
