@@ -18,7 +18,7 @@
 -export([pathFindType/3]).
 -export([readLink/1]).
 -export([fileType/1]).
--export([lastMod/1]).
+-export([lastMod/1,lastModGMT/1]).
 -export([resolveDots/1]).
 -export([absPath/1]).
 -export([real_path/1,real_path/2]).
@@ -65,10 +65,16 @@ readLink(File) ->
         Other -> Other
     end.
 
+lastModGMT(File) ->
+    case lastMod(File) of
+	E = {error,_} -> E;
+	TS ->  calendar:local_time_to_universal_time_dst(TS)
+    end.
+
 lastMod(File) ->
-    case file:read_file_info(File) of
-	{ok,#file_info{mtime=M}} -> {ok,M};
-	Other -> Other
+    case filelib:last_modified(File) of
+	0 -> {error,enoent};
+	Other -> {ok,Other}
     end.
 
 fileType(File) ->
