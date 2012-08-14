@@ -15,6 +15,7 @@
 
 -export([mkio/1,mkio/2]).
 -export([mkbin/1,mkbin/2]).
+-export([mkservicename/1]).
 -export([mkstr/1,mkstr/2]).
 -export([mkatom/1,mkatom/2,mkexatom/2]).
 -export([concat/1]).
@@ -25,6 +26,7 @@
 -export([to_lower/1,to_upper/1]).
 -export([to_integer/1,to_float/1]).
 
+-define(format, utf8).
 
 to_float(Bin) when is_binary(Bin) -> to_float(binary_to_list(Bin));
 to_float(List) when is_list(List) ->
@@ -85,7 +87,7 @@ mkio(Other) -> io_lib:format("~p",[Other]).
 mkio(Fmt,Args) -> io_lib:format(Fmt,Args).
 
 mkbin(Bin) when is_binary(Bin) -> Bin;
-mkbin(Atom) when is_atom(Atom) -> atom_to_binary(Atom,utf8);
+mkbin(Atom) when is_atom(Atom) -> atom_to_binary(Atom,?format);
 mkbin(Int) when is_integer(Int) -> list_to_binary(integer_to_list(Int));
 mkbin(Float) when is_float(Float) -> list_to_binary(float_to_list(Float));
 mkbin(List) when is_list(List) -> try list_to_binary(List) catch error:badarg -> mkbin("~p",[List]) end;
@@ -113,7 +115,7 @@ concat([Part|Parts],Acc) when is_list(Part) ->
     concat(Parts,[Part|Acc]).
 
 mkatom(Atom) when is_atom(Atom) -> Atom;
-mkatom(Bin) when is_binary(Bin) -> erlang:binary_to_atom(Bin,utf8);
+mkatom(Bin) when is_binary(Bin) -> erlang:binary_to_atom(Bin,?format);
 mkatom(String) -> list_to_atom(String).
 
 mkexatom(Fmt,Args) ->
@@ -127,3 +129,13 @@ timeToStr(NowTime={_,_,Micro}) ->
     {{Year,Month,Day},{Hour,Min,Sec}} = DateTime,
     iolist_to_binary(io_lib:format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B.~B",
                                    [Year, Month, Day, Hour, Min, Sec,Micro])).
+
+mkservicename(Bin) when is_binary(Bin) ->
+    list_to_binary(string:to_lower(binary_to_list(Bin)));
+mkservicename(Str=[I|_]) when is_integer(I) ->
+    list_to_binary(string:to_lower(Str));
+mkservicename(Atom) when is_atom(Atom) ->
+    list_to_binary(string:to_lower(atom_to_list(Atom))).
+    
+
+
