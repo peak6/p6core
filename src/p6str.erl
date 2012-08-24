@@ -15,7 +15,6 @@
 
 -export([mkio/1,mkio/2]).
 -export([mkbin/1,mkbin/2]).
--export([mkservicename/1]).
 -export([mkstr/1,mkstr/2]).
 -export([mkatom/1,mkatom/2,mkexatom/2]).
 -export([concat/1]).
@@ -24,6 +23,7 @@
 -export([sock_to_str/1,local_sock_to_str/1]).
 -export([sock_to_ipstr/1,local_sock_to_ipstr/1]).
 -export([to_lower/1,to_upper/1]).
+-export([to_lower_bin/1,to_upper_bin/1]).
 -export([to_integer/1,to_float/1]).
 
 -define(format, utf8).
@@ -48,12 +48,16 @@ to_lower(L) when is_list(L) -> [ to_lower(C) || C <- L ];
 to_lower(Bin) when is_binary(Bin) -> << <<(to_lower(B))>> || <<B:8>> <= Bin >>;
 to_lower(Other) -> Other.
 
+
+to_lower_bin(Str) -> << <<(to_lower(A))>> || <<A>> <= mkbin(Str) >>.
+
 %% a = 97, z = 122
 to_upper(I) when I > 96 andalso I < 123 -> I - 32;
 to_upper(L) when is_list(L) -> [ to_upper(C) || C <- L ];
 to_upper(Bin) when is_binary(Bin) -> << <<(to_upper(B))>> || <<B:8>> <= Bin >>;
 to_upper(Other) -> Other.
 
+to_upper_bin(Str) -> << <<(to_upper(A))>> || <<A>> <= mkbin(Str) >>.
 
 ip_to_str({A,B,C,D}) ->
     mkstr("~p.~p.~p.~p",[A,B,C,D]).
@@ -95,6 +99,7 @@ mkbin(Other) -> mkbin("~p",[Other]).
 
 mkbin(Fmt,Args) -> iolist_to_binary(io_lib:format(Fmt,Args)).
 
+
 mkstr([]) -> [];
 mkstr(Bin) when is_binary(Bin) -> binary_to_list(Bin);
 mkstr(Atom) when is_atom(Atom) -> atom_to_list(Atom);
@@ -130,12 +135,5 @@ timeToStr(NowTime={_,_,Micro}) ->
     iolist_to_binary(io_lib:format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B.~B",
                                    [Year, Month, Day, Hour, Min, Sec,Micro])).
 
-mkservicename(Bin) when is_binary(Bin) ->
-    list_to_binary(string:to_lower(binary_to_list(Bin)));
-mkservicename(Str=[I|_]) when is_integer(I) ->
-    list_to_binary(string:to_lower(Str));
-mkservicename(Atom) when is_atom(Atom) ->
-    list_to_binary(string:to_lower(atom_to_list(Atom))).
-    
 
 
