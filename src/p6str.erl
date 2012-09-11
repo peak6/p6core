@@ -25,8 +25,24 @@
 -export([to_lower/1,to_upper/1]).
 -export([to_lower_bin/1,to_upper_bin/1]).
 -export([to_integer/1,to_float/1]).
+-export([ends_with/2]).
+-export([join/2]).
 
 -define(format, utf8).
+
+ends_with(Subject,EndsWith) when is_binary(Subject), is_binary(EndsWith) ->
+    size(EndsWith) == binary:longest_common_suffix([Subject,EndsWith]);
+ends_with(Subject,EndsWith) when is_list(Subject), is_list(EndsWith) ->
+    lists:suffix(EndsWith,Subject).
+
+join(List,With) when is_binary(With) ->
+    binary:list_to_bin(join(List,With,[]));
+join(List,With) when is_list(With) ->
+    string:join(List,With).
+
+join([A],_,Acc) -> lists:reverse([A|Acc]);
+join([L|Rest],With,Acc) -> join(Rest,With,[With,L|Acc]).
+
 
 to_float(Bin) when is_binary(Bin) -> to_float(binary_to_list(Bin));
 to_float(List) when is_list(List) ->

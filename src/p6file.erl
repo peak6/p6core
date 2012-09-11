@@ -22,9 +22,19 @@
 -export([resolveDots/1]).
 -export([absPath/1]).
 -export([real_path/1,real_path/2]).
+-export([join/1,join/2]).
 
 -include_lib("kernel/include/file.hrl").
 -include("p6core.hrl").
+
+join(List = [Name|_Rest]) when is_binary(Name) ->
+    re:replace(p6str:join(List,<<"/">>),<<"/+">>,<<"/">>,[{return,binary},global]);
+join(List = [[N|_]|_Rest]) when is_integer(N) ->
+    re:replace(p6str:join(List,<<"/">>),<<"/+">>,<<"/">>,[{return,list},global]).
+
+join(Name1,Name2) when is_binary(Name2) -> join([Name1,Name2]);
+join(Name,Name2=[N|_]) when is_integer(N) -> join([Name,Name2]);
+join(Name,Names) when is_list(Names) -> join([Name|Names]).
 
 absPath(Path = [$/|_Ignore]) -> resolveDots(Path);
 absPath(Path) -> resolveDots(p6str:mkstr("~s/~s",[okget:ok(file:get_cwd()),Path])).
@@ -33,6 +43,12 @@ absPath(Path) -> resolveDots(p6str:mkstr("~s/~s",[okget:ok(file:get_cwd()),Path]
 real_path(Path) ->
     [Root|Rest] = filename:split(filename:absname(Path)),
     real_path(Root,Rest).
+
+real_path(Base,Path) when is_binary(Path) ->
+    case filename:split(Path) of
+        [<<$/>>|Rest] -> real_path(Base,Rest);
+        Other -> real_path(Base,Other)
+    end;
 
 %% Returns Base + Resolved path elements
 real_path(Path,[]) -> {ok,resolveDots(Path)};
