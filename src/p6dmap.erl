@@ -17,11 +17,13 @@
 -include("p6core.hrl").
 -include("dmap.hrl").
 
-new(Name) -> new(Name,?MODULE).
-new(Name,XFormAddMod) -> p6dmap_sup:create_dmap(Name,XFormAddMod).
+ensure(Name) -> 
+    case lists:member(Name,allMaps()) of
+	true -> ok;
+	false -> new(Name)
+    end.
 
-%% Default transformer, doesn't change anything
-xformEntryAdd(E) -> E.
+new(Name) -> p6dmap_sup:create_dmap(Name).
 
 allState(Name) -> [{P,gen_server:call(P,getState)} || P <- [whereis(Name)|peers(Name)] ].
 allMaps() -> [N || {N,_,_,_} <- supervisor:which_children(p6dmap_sup)].
@@ -29,6 +31,13 @@ dump(Name) -> ets:tab2list(Name).
 dumpAll() -> [ {N,dump(N)} || N <- allMaps() ].
 
 keySet(Name) -> keySet(Name,'_').
+
+make_any_guard([Item]) -> {'==','$1',Item};
+make_any_guard([Item|Items]) -> {'orelse',{'==','$1',Item},make_any_guard(Items)}.
+
+%% Find elements with the specified key, returns [Key,Owner,Value]
+any(Name,Keys) -> ets:select(Name,[{#dm{key='$1',owner='$2',val='$3'},[make_any_guard(Keys)],['$$']}]).
+
 
 getWithDM(Name,Key) -> ets:match(Name,#dm{key=Key,node='$1',owner='$2',val='$3'}).
 get(Name,Key) -> ets:match(Name,#dm{key=Key,owner='$1',val='$2'}).
@@ -77,6 +86,4 @@ cast(Name,Term) -> gen_server:cast(Name,Term).
 castAll(Name,Term) -> gen_server:abcast(Name,{node(),Term}).
 callAll(Name,Term) -> gen_server:multi_call(Name,{node(),Term}).
 
-xformValues(Name,MFA={_M,_F,_A}) ->
-    castAll(Name,{xformVals,MFA}).
 

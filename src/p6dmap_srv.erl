@@ -18,7 +18,7 @@
 %% ------------------------------------------------------------------
 %% API Function Exports
 %% ------------------------------------------------------------------
--export([start_link/2]).
+-export([start_link/1]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -26,30 +26,31 @@
 -include("dmap.hrl").
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 %% gen_server State
--record(state,{name,xform,clientGroup}).
+-record(state,{name,clientGroup}).
 
 %% Convenience macros
 -define(ENTRY(Type,Key,Val,Owner), #dm{pk={Key,Owner},owner=Owner,key=Key,val=Val,type=Type,node=node()}).
 -define(REMOTE(Node,Key,Val,Owner), #dm{pk={Key,Owner},owner=Owner,key=Key,val=Val,type=g,node=Node}).
 -define(DELETE(Table,Match), ets:select_delete(Table,[{Match,[],[true]}])).
+
 %% ------------------------------------------------------------------
 %% API Function Definitions
 %% ------------------------------------------------------------------
-start_link(Name,AddXForm) ->
-    gen_server:start_link({local, Name}, ?MODULE, [Name,AddXForm], []).
+start_link(Name) ->
+    gen_server:start_link({local, Name}, ?MODULE, [Name], []).
 
-init([Name,AddXForm]) ->
+init([Name]) ->
     Name = ets:new(Name,[named_table,{keypos,2}]),
     net_kernel:monitor_nodes(true),
     castPeers(Name,gimme),
     CG = ?CG(Name),
     p6pg:start_link(CG,[{watcher,self()}]),
-    {ok, #state{name=Name,clientGroup=CG,xform=AddXForm}}.
+    {ok, #state{name=Name,clientGroup=CG}}.
 
 handle_call(getState,_From,State) -> {reply,?DUMP_REC(state,State),State};
 
 handle_call({add,Type,Key,Val,Owner},_From,State=#state{name=Name,clientGroup=CG}) ->
-    Entry = xformAdd(?ENTRY(Type,Key,Val,Owner),State),
+    Entry = ?ENTRY(Type,Key,Val,Owner),
     case ets:insert_new(Name,Entry) of
         true ->
 			case Type of
@@ -101,7 +102,7 @@ handle_cast({D,#dmSet{owner=O,key=K,val=V}},State=#state{name=Name}) ->
     {noreply,State};
 
 handle_cast({D,#dmAdd{owner=O,key=K,val=V}},State=#state{name=Name}) ->
-    ets:insert(Name,xformAdd(?REMOTE(D,K,V,O),State)),
+    ets:insert(Name,?REMOTE(D,K,V,O)),
     {noreply,State};
 
 handle_cast({_Node,#dmDel{key=K,owner=O}},State=#state{name=Name}) ->
@@ -129,16 +130,11 @@ handle_cast({Node,#dmDelOwnerKey{owner=Who, key=Key}},
     end,
     {noreply,State};
 
-handle_cast({Node,#dmState{entries=E}},State=#state{name=Name,xform=XForm}) ->
+handle_cast({Node,#dmState{entries=E}},State=#state{name=Name}) ->
     lists:foreach(fun([P,K,V])->
-                          ets:insert(Name,xformAdd(?REMOTE(Node,K,V,P),XForm))
+                          ets:insert(Name,?REMOTE(Node,K,V,P))
                   end, E),
     ?linfo("~s synchronized ~p entries from ~s",[Name,length(E),Node]),
-    {noreply,State};
-
-handle_cast({Node,{xformVals,MFA={_M,_F,_A}}},State=#state{name=Name}) ->
-    Select = [{#dm{node=Node,owner='$1',key='$2',val='$3'},[],['$$']}],
-    doXForm(Name,MFA,ets:select(Name,Select,5)),
     {noreply,State};
 
 handle_cast(Msg, State) ->
@@ -191,28 +187,6 @@ getType(Name,Key,Owner) ->
         [] -> not_found
     end.
 
-
-xformAdd(Ent,#state{xform=Mod}) -> xformAdd(Ent,Mod);
-xformAdd(Ent,Mod) -> Mod:xformEntryAdd(Ent).
-
-doXForm(Name,Fun,Data) -> doXForm(Name,Fun,{0,0},Data).
-
-doXForm(_Name,_Fun,Status,'$end_of_table') -> Status;
-
-doXForm(Name,MFA={M,F,A},Stats,{Match,Cont}) ->
-    NewStats =
-    lists:foldl(fun(Data=[O,K,_],{Recs,Changed}) ->
-                        case apply(M,F,[Data|A]) of
-                            '$ignore' ->
-                                {Recs+1,Changed};
-                            NewV ->
-                                true = ets:update_element(Name,{K,O},[{#dm.val,NewV}]),
-                                {Recs+1,Changed+1}
-                        end
-                end,
-                Stats,
-                Match),
-    doXForm(Name,MFA,NewStats,ets:select(Cont)).
 
 
 

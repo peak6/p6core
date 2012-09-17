@@ -24,6 +24,7 @@
 -export([sock_to_ipstr/1,local_sock_to_ipstr/1]).
 -export([to_lower/1,to_upper/1]).
 -export([to_lower_bin/1,to_upper_bin/1]).
+-export([to_lower_list/1]).
 -export([to_integer/1,to_float/1]).
 -export([ends_with/2]).
 -export([join/2]).
@@ -66,6 +67,10 @@ to_lower(Other) -> Other.
 
 
 to_lower_bin(Str) -> << <<(to_lower(A))>> || <<A>> <= mkbin(Str) >>.
+
+to_lower_list(Items) when is_list(Items) ->
+    [ to_lower_bin(I) || I <- Items ];
+to_lower_list(Item) -> [to_lower_bin(Item)].
 
 %% a = 97, z = 122
 to_upper(I) when I > 96 andalso I < 123 -> I - 32;

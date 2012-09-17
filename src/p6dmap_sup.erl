@@ -17,20 +17,20 @@
 
 %% API
 -export([start_link/0]).
--export([create_dmap/2]).
+-export([create_dmap/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
 
 %% Helper macro for declaring children of supervisor
--define(DMAP(Name,AddXForm), {Name, {p6dmap_srv, start_link, [Name,AddXForm]}, permanent, 5000, worker, [dmap_srv]}).
+-define(DMAP(Name), {Name, {p6dmap_srv, start_link, [Name]}, permanent, 5000, worker, [dmap_srv]}).
 
 %% ===================================================================
 %% API functions
 %% ===================================================================
 
-create_dmap(Name,AddXForm) ->
-    supervisor:start_child(?MODULE,?DMAP(Name,AddXForm)).
+create_dmap(Name) ->
+    {ok,_} = supervisor:start_child(?MODULE,?DMAP(Name)).
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).

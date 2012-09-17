@@ -39,7 +39,6 @@ start_link() ->
 init([]) ->
     Children = [
                 {hot_deploy,?CHILD(p6hot_deploy,worker)},
-                {autocluster,?CHILD(p6auto_cluster,worker)},
                 {dmap,?CHILD(p6dmap_sup,supervisor)},
                 {uuid,?CHILD(p6uuid_mgr,worker)}
                ],
