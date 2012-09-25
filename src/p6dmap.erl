@@ -43,6 +43,8 @@ getWithDM(Name,Key) -> ets:match(Name,#dm{key=Key,node='$1',owner='$2',val='$3'}
 get(Name,Key) -> ets:match(Name,#dm{key=Key,owner='$1',val='$2'}).
 get(Name,Owner,Key) -> ets:match(Name,#dm{key=Key,val='$1',owner=Owner}).
 
+all(Name) -> ets:match(Name,#dm{node='$1',key='$2',val='$3',owner='$4'}).
+
 uniqueKeys(Name) -> lists:usort([K || [K] <- ets:match(Name,#dm{key='$1'})]).
 
 del(Name,Type,Owner,Key) -> call(Name,{delete,Type,Key,Owner}).
