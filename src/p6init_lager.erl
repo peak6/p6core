@@ -20,7 +20,7 @@ initLager(Env,_Props) ->
     ?lset(crash_log_date,"$D0"),
     ?lset(crash_log_size,10485760),
     ?lset(crash_log_msg_size,65536),
-    ?lset(crash_log,p6str:mkstr("~s/crash.log",[LogDir])),
+    ?lset(crash_log,p6str:mkstr("~s/~s.crash.log",[LogDir,node()])),
     case application:get_env(p6core,log_console) of
         {ok,true} -> Console = [{lager_console_backend,[debug,true]}];
         _ -> Console = []
@@ -28,7 +28,7 @@ initLager(Env,_Props) ->
 
     ?lset(handlers,
           Console ++ [
-                      {lager_file_backend,[{p6str:mkstr("~s/server.log",[LogDir]),debug,10485760,"$D0",5}]}
+                      {lager_file_backend,[{p6str:mkstr("~s/~s.server.log",[LogDir,node()]),debug,10485760,"$D0",5}]}
                      ]),
     ?lset(error_logger_redirect,true),
     Env.
