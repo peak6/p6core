@@ -19,9 +19,11 @@
 -export([mkatom/1,mkatom/2,mkexatom/2]).
 -export([concat/1]).
 -export([timeToStr/1]).
--export([ip_to_str/1,ip_port_to_str/2]).
+-export([ip_to_str/1,ip_port_to_str/2,ip_port_to_bin/2]).
 -export([sock_to_str/1,local_sock_to_str/1]).
 -export([sock_to_ipstr/1,local_sock_to_ipstr/1]).
+-export([sock_to_port/1,local_sock_to_port/1]).
+-export([full_sock_bin/2,full_remote_sock_bin/1,full_local_sock_bin/1]).
 -export([to_lower/1,to_upper/1]).
 -export([to_lower_bin/1,to_upper_bin/1]).
 -export([to_lower_list/1]).
@@ -86,6 +88,9 @@ ip_to_str({A,B,C,D}) ->
 ip_port_to_str({A,B,C,D},Port) ->
     mkstr("~p.~p.~p.~p:~p",[A,B,C,D,Port]).
 
+ip_port_to_bin({A,B,C,D},Port) ->
+    mkbin("~p.~p.~p.~p:~p",[A,B,C,D,Port]).
+
 local_sock_to_str(Sock) ->
     {ok,{H,P}} = inet:sockname(Sock),
     ip_port_to_str(H,P).
@@ -93,6 +98,14 @@ local_sock_to_str(Sock) ->
 local_sock_to_ipstr(Sock) ->
     {ok,{{A,B,C,D},_Port}} = inet:sockname(Sock),
     mkstr("~p.~p.~p.~p",[A,B,C,D]).
+
+sock_to_port(Sock) ->
+    {ok,{_,Port}} = inet:peername(Sock),
+    Port.
+
+local_sock_to_port(Sock) -> 
+    {ok,{_,Port}} = inet:sockname(Sock),
+    Port.
 
 sock_to_ipstr(Sock) ->
     {ok,{{A,B,C,D},_Port}} = inet:peername(Sock),
@@ -102,6 +115,14 @@ sock_to_str(Sock) ->
     {ok,{H,P}} = inet:peername(Sock),
     ip_port_to_str(H,P).
 
+full_local_sock_bin(Sock) -> full_sock_bin(Sock,<<"->">>).
+full_remote_sock_bin(Sock) -> full_sock_bin(Sock,<<"<-">>).
+full_sock_bin(Sock,Dir) ->
+    {ok,{{LA,LB,LC,LD},LP}} = inet:sockname(Sock),
+    {ok,{{RA,RB,RC,RD},RP}} = inet:peername(Sock),
+    mkbin("~p.~p.~p.~p:~p~s~p.~p.~p.~p:~p",
+          [LA,LB,LC,LD,LP,Dir,RA,RB,RC,RD,RP]).
+    
 mkio(Bin) when is_binary(Bin) -> [Bin];
 mkio(Atom) when is_atom(Atom) -> atom_to_list(Atom);
 mkio(Int) when is_integer(Int) -> integer_to_list(Int);
