@@ -106,6 +106,7 @@ stateChanged(Name,{error,enotdir},Tracked) ->
         false ->
             [Name|Tracked]
     end;
+stateChanged('lager_mochiglobal:loglevel',missing,Tracked) -> Tracked;
 stateChanged(Name,missing,Tracked) ->
     case lists:member(Name,Tracked) of
         true ->
