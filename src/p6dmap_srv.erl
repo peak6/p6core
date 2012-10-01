@@ -137,6 +137,9 @@ handle_cast({Node,#dmState{entries=E}},State=#state{name=Name}) ->
     ?linfo("~s synchronized ~p entries from ~s",[Name,length(E),Node]),
     {noreply,State};
 
+handle_cast({_,{xformVals,{_,_,_}}},State) ->
+    {noreply,State};
+
 handle_cast(Msg, State) ->
     ?linfo("Unexpected cast: ~p, with state: ~p",[Msg,State]),
     {noreply, State}.
