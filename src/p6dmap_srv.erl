@@ -112,13 +112,8 @@ handle_cast({_Node,#dmDel{key=K,owner=O}},State=#state{name=Name}) ->
     end,
     {noreply,State};
 
-handle_cast({Node,#dmDelOwner{owner=Who}},State=#state{name=Name}) ->
-    case ets:match(Name,#dm{owner=Who,key='$2'}) of
-        [] -> ?linfo("Nothing to delete for ~p",[Who]);
-        Entries ->
-            N = ?DELETE(Name,#dm{owner=Who}),
-            ?linfo("Deleted ~p entries: ~p for ~p / ~p",[N,lists:flatten(Entries),Who,Node])
-    end,
+handle_cast({_Node,#dmDelOwner{owner=Who}},State=#state{name=Name}) ->
+    ?DELETE(Name,#dm{owner=Who}),
     {noreply,State};
 
 handle_cast({Node,#dmDelOwnerKey{owner=Who, key=Key}},
