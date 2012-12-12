@@ -145,12 +145,8 @@ handle_info({nodeup,Node},State=#state{name=Name}) ->
     {noreply,State};
 
 handle_info({nodedown,Node},State=#state{name=Name}) ->
-    case ets:match(Name,#dm{node=Node,key='$2'}) of
-        [] -> ?linfo("Nothing to delete for dead node ~p",[Node]);
-        Entries ->
-            N = ?DELETE(Name,#dm{node=Node}),
-            ?linfo("Deleted ~p entries: ~p for dead node ~p",[N,lists:flatten(Entries),Node])
-    end,
+    N = ?DELETE(Name,#dm{node=Node}),
+    ?linfo("Deleted ~p entries from: ~p for dead node ~p",[N,Name,Node]),
     {noreply,State};
 
 handle_info({groupMemberUp,_,_}, State) ->
