@@ -20,6 +20,14 @@
 -export([any/2,any/3]).
 -export([all/2]).
 -export([anyAndMap/2,anyAndMap/3]).
+-export([put_all/2]).
+
+put_all(Src,Target) ->
+    lists:foldl(fun({K,_}=Entry,Result) ->
+			lists:keystore(K,1,Result,Entry)
+		end,
+		Target,
+		Src).
 
 has(Key,PList) ->
     lists:any(fun({K,_}) -> K == Key end,PList).
