@@ -145,8 +145,10 @@ handle_info({nodeup,Node},State=#state{name=Name}) ->
     {noreply,State};
 
 handle_info({nodedown,Node},State=#state{name=Name}) ->
-    N = ?DELETE(Name,#dm{node=Node}),
-    ?linfo("Deleted ~p entries from: ~p for dead node ~p",[N,Name,Node]),
+    case ?DELETE(Name,#dm{node=Node}) of
+	0 -> ok;
+	N -> ?linfo("Deleted ~p entries from: ~p for dead node ~p",[N,Name,Node])
+    end,
     {noreply,State};
 
 handle_info({groupMemberUp,_,_}, State) ->
