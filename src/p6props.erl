@@ -46,8 +46,8 @@ getApp(Key,Default) ->
 
 getApp(App, Key, Default) ->
     case application:get_env(App,Key) of
-        undefined -> Default;
-        Other -> Other
+        {ok,Val} -> Val;
+	_ -> Default
     end.
 
 get(Key,PList,Default) ->
