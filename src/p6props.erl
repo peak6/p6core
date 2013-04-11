@@ -15,7 +15,7 @@
 
 -export([first/2,first/3]).
 -export([has/2,hasAny/2]).
--export([get/2,get/3]).
+-export([get/2,get/3,getAndMap/3]).
 -export([getApp/1,getApp/2]).
 -export([any/2,any/3]).
 -export([all/2]).
@@ -48,6 +48,12 @@ get(Key,PList,Default) ->
     case proplists:lookup(Key,PList) of
         none -> Default;
         {_,Val} -> Val
+    end.
+
+getAndMap(Key,Fun,PList) ->
+    case get(Key,PList) of
+	undefined -> undefined;
+	Val -> Fun(Val)
     end.
 
 get(Key,PList) ->
