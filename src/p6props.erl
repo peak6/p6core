@@ -16,7 +16,7 @@
 -export([first/2,first/3]).
 -export([has/2,hasAny/2]).
 -export([get/2,get/3,getAndMap/3]).
--export([getApp/1,getApp/2]).
+-export([getApp/1,getApp/2,getApp/3]).
 -export([any/2,any/3]).
 -export([all/2]).
 -export([anyAndMap/2,anyAndMap/3]).
@@ -40,6 +40,12 @@ getApp(Key) ->
 
 getApp(Key,Default) ->
     case application:get_env(Key) of
+        undefined -> Default;
+        Other -> Other
+    end.
+
+getApp(App, Key, Default) ->
+    case application:get_env(App,Key) of
         undefined -> Default;
         Other -> Other
     end.
