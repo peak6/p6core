@@ -51,6 +51,12 @@ del(Name,Type,Owner,Key) -> call(Name,{delete,Type,Key,Owner}).
 add(Name,Type,Owner,Key,Val) -> call(Name,{add,Type,Key,Val,Owner}).
 set(Name,Owner,Key,Val) -> call(Name,{set,Key,Val,Owner}).
 
+setOrAddGlobal(Name,Key,Val) ->
+    case set(Name,Key,Val) of
+	not_found -> addGlobal(Name,Key,Val);
+	Other -> Other
+    end.
+
 keySet(Name,Type) -> sets:from_list( [ K || [K] <- ets:match(Name,#dm{key='$1',type=Type})]).
 
 state(Name) -> call(Name,getState).
@@ -64,6 +70,7 @@ keyToNodes(Name) -> ets:match(Name,#dm{node='$2',key='$1'}).
 getOwnerEntries(Name,Owner) -> getOwnerEntries(Name,Owner,'_').
 getOwnerEntries(Name,Owner,Type) -> ets:match(Name,#dm{owner=Owner,key='$1',val='$2',type=Type}).
 getNodeEntries(Name,Type,Node) -> ets:match(Name,#dm{owner='$1',key='$2',val='$3',type=Type,node=Node}).
+getForNode(Name,Node,Key) -> ets:match(Name,#dm{node=Node,key=Key,val='$1'}).
 getOurEntries(Name) -> getNodeEntries(Name,'_',node()).
 getOurEntries(Name,Type) -> getNodeEntries(Name,Type,node()).
 
