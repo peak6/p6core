@@ -22,7 +22,7 @@ os.chdir(basedir)
 extensions = []
 
 ## Load custom command line options
-for f in glob.glob("scontrol.*.py") + glob.glob("deps/*/scontrol.*.py"):
+for f in glob.glob("priv/scontrol.*.py") + glob.glob("deps/*/priv/scontrol.*.py"):
     m = re.sub(r'.py$','',re.sub(r'/','_',re.sub(r'\.','_',f)))
     print "Loading extension: "+f
     extensions.append(imp.load_source(m,f))
