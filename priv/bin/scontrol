@@ -145,6 +145,11 @@ def try_load(file):
     else:
         print "Not found:", file
 
+if not options.env:
+    parser.print_help()
+    print "\nENV not specified"
+    exit(1)
+
 
 for sc in options.sconfigs:
     try_load(sc)
@@ -154,11 +159,6 @@ callext("after_optparse",options)
 if not options.appname:
     parser.print_help()
     print "\nappname not specified"
-    exit(1)
-
-if not options.env:
-    parser.print_help()
-    print "\nENV not specified"
     exit(1)
 
 hostname = socket.gethostname()
