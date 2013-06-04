@@ -16,7 +16,7 @@ deps:
 	$(REBAR) get-deps
 	$(REBAR) update-deps
 
-test:
+test: compile
 	$(REBAR) eunit
 
 clean: 

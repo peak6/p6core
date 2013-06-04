@@ -1,7 +1,9 @@
-PEAK6 Core Erlang Library (OpenSource)
+PEAK6 Core Erlang Library
 =======================
 
-This library contains various utility functions and logging facilities intended to be used by all erlang based systems.
+A library of various utilities and general purpose services for Erlang based applications.
+
+
 
 
 
