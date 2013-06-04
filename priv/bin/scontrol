@@ -14,7 +14,7 @@ from datetime import datetime
 from optparse import OptionParser
 
 
-basedir = os.path.dirname(sys.path.abspath(sys.argv[0]))
+basedir = os.path.dirname(os.path.abspath(sys.argv[0]))
 os.chdir(basedir)
 
 (_,version) = os.path.split(os.path.realpath(sys.path[0]))
