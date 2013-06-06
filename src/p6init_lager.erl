@@ -19,6 +19,7 @@ initLager(Env,_Props) ->
     ?lset(included_applications,[]),
     ?lset(crash_log_date,"$D0"),
     ?lset(crash_log_size,0),
+    ?lset(colored,true),
     ?lset(crash_log_msg_size,65536),
     ?lset(crash_log,p6str:mkstr("~s/~s.crash.log",[LogDir,node()])),
     case application:get_env(p6core,log_console) of
@@ -28,7 +29,13 @@ initLager(Env,_Props) ->
 
     ?lset(handlers,
           Console ++ [
-                      {lager_file_backend,[{p6str:mkstr("~s/~s.server.log",[LogDir,node()]),debug,0,"$D0",5}]}
+                      {lager_file_backend,[
+                                           {level,debug},
+                                           {size,0}, %% unlimited size before rotate
+                                           {date,"$D0"}, %% Rotate at midnight
+                                           {count,14}, %% Keep 2 weeks of logs around
+                                           {file,p6str:mkstr("~s/~s.server.log",[LogDir,node()])}
+                                          ]}
                      ]),
     ?lset(error_logger_redirect,true),
     Env.
